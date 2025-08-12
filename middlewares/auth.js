@@ -16,7 +16,7 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = verifyAccessToken(token);
-    const user = await User.findOne(decoded._id , "-__v -password")
+    const user = await User.findOne({_id:decoded.id} , "-__v -password")
 
     if (!user) {
       throw new AppError("User Not Found", 404);

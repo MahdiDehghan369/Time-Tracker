@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const appError = require("../../utils/appError");
 const TimeEntry = require("./timeEntry.model");
 
@@ -82,19 +83,50 @@ exports.getMyTimes = async (userId, query) => {
   }
 
   const startOfDay = new Date(query.day);
-  startOfDay.setHours(0, 0, 0, 0);
+  startOfDay.setUTCHours(0, 0, 0, 0);
 
   const endOfDay = new Date(query.day);
-  endOfDay.setHours(23, 59, 59, 999);
+  endOfDay.setUTCHours(23, 59, 59, 999);
 
-  const myTimes = await TimeEntry.find(
-    { userId, createdAt: { $gte: startOfDay, $lte: endOfDay } },
-    "-__v -userId"
-  ).lean();
+  const objectUserId = new mongoose.Types.ObjectId(userId);
+
+    const myTimes = await TimeEntry.aggregate([
+      {
+        $match: {
+          startTime: { $gte: startOfDay, $lte: endOfDay },
+          userId: objectUserId,
+        },
+      },
+      {
+        $group: {
+          _id: "$userId",
+          totalMinutes: { $sum: "$durationMinutes" },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      {
+        $project: {
+          _id: 0,
+          userId: "$user._id",
+          name: "$user.name",
+          email: "$user.email",
+          totalMinutes: 1,
+        },
+      },
+    ]);
 
   return {
     success: true,
     times: myTimes,
+    totalMinutes: myTimes.length > 0 ? myTimes[0].totalMinutes : 0,
   };
 };
 
@@ -106,19 +138,50 @@ exports.getUsersTimes = async (userId , query) => {
   }
 
   const startOfDay = new Date(query.day);
-  startOfDay.setHours(0, 0, 0, 0);
+  startOfDay.setUTCHours(0, 0, 0, 0);
 
   const endOfDay = new Date(query.day);
-  endOfDay.setHours(23, 59, 59, 999);
+  endOfDay.setUTCHours(23, 59, 59, 999);
 
-  const myTimes = await TimeEntry.find(
-    { userId, createdAt: { $gte: startOfDay, $lte: endOfDay } },
-    "-__v -userId"
-  ).lean();
+  const objectUserId = new mongoose.Types.ObjectId(userId);
+
+  const myTimes = await TimeEntry.aggregate([
+    {
+      $match: {
+        startTime: { $gte: startOfDay, $lte: endOfDay },
+        userId: objectUserId,
+      },
+    },
+    {
+      $group: {
+        _id: "$userId",
+        totalMinutes: { $sum: "$durationMinutes" },
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "_id",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    { $unwind: "$user" },
+    {
+      $project: {
+        _id: 0,
+        userId: "$user._id",
+        name: "$user.name",
+        email: "$user.email",
+        totalMinutes: 1,
+      },
+    },
+  ]);
 
   return {
     success: true,
     times: myTimes,
+    totalMinutes: myTimes.length > 0 ? myTimes[0].totalMinutes : 0,
   };
 }
 
@@ -171,3 +234,4 @@ exports.editTime = async (userId, timeId , data) => {
     },
   };
 };
+
