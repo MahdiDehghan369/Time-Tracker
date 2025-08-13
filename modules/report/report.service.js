@@ -59,6 +59,7 @@ exports.getDailyReport = async (data) => {
     let endOfDay = new Date(data.day);
     endOfDay.setUTCHours(23, 59, 59, 999);
 
+
   const leaderboard = await TimeEntry.aggregate([
     {
       $match: {

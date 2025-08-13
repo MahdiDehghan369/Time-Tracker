@@ -88,6 +88,7 @@ exports.getMyTimes = async (userId, query) => {
   const endOfDay = new Date(query.day);
   endOfDay.setUTCHours(23, 59, 59, 999);
 
+
   const objectUserId = new mongoose.Types.ObjectId(userId);
 
     const myTimes = await TimeEntry.aggregate([
@@ -123,10 +124,14 @@ exports.getMyTimes = async (userId, query) => {
       },
     ]);
 
+
+    const tasks = await TimeEntry.find({userId , startTime : {$gte : startOfDay , $lte : endOfDay}} , "-__v")
+
   return {
     success: true,
     times: myTimes,
     totalMinutes: myTimes.length > 0 ? myTimes[0].totalMinutes : 0,
+    tasks
   };
 };
 
@@ -178,10 +183,16 @@ exports.getUsersTimes = async (userId , query) => {
     },
   ]);
 
+  const tasks = await TimeEntry.find(
+    { userId, startTime: { $gte: startOfDay, $lte: endOfDay } },
+    "-__v"
+  );
+
   return {
     success: true,
     times: myTimes,
     totalMinutes: myTimes.length > 0 ? myTimes[0].totalMinutes : 0,
+    tasks
   };
 }
 

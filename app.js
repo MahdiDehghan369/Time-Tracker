@@ -7,6 +7,7 @@ const errorHandler = require("./utils/errorHandler");
 const authRouter = require("./modules/auth/auth.routes");
 const timeEntryRouter = require("./modules/time-entry/timeEntry.routes");
 const reportRouter = require("./modules/report/report.routes");
+const userRouter = require("./modules/user/user.routes");
 
 app.use(cookieParser());
 app.use(cors());
@@ -27,6 +28,7 @@ app.get("/", (req, res, next) => {
 app.use("/auth", authRouter);
 app.use("/time-entries", timeEntryRouter);
 app.use("/reports", reportRouter);
+app.use("/users", userRouter);
 
 app.use((req, res) => {
   return res.status(404).json({

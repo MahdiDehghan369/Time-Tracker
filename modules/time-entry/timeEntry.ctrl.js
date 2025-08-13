@@ -32,11 +32,10 @@ exports.setManualTime = async (req, res, next) => {
 exports.getMyTimes = async (req, res, next) => {
   try {
     const userId = req?.user?.id;
-
     let query = {};
 
-    if (req.body.day) {
-      query.day = req.body.day;
+    if (req.query.day) {
+      query.day = req.query.day;
     }
 
     const result = await timeEntryService.getMyTimes(userId, query);
@@ -53,8 +52,8 @@ exports.getUsersTimes = async (req, res, next) => {
 
     let query = {};
 
-    if (req.body.day) {
-      query.day = req.body.day;
+    if (req.query.day) {
+      query.day = req.query.day;
     }
 
     const result = await timeEntryService.getUsersTimes(userId, query);
