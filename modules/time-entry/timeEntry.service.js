@@ -226,12 +226,15 @@ exports.editTime = async (userId, timeId , data) => {
       title: data.title,
       description: data.description,
       startTime: data.startTime,
-      endTime: data.editTime,
+      endTime: data.endTime,
       durationMinutes,
     }, {
       new: true
     }
   );
+
+
+  console.log(time);
 
   return {
     success: true,
